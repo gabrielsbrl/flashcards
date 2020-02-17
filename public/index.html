@@ -83,13 +83,12 @@
                         let mainContainer = document.querySelector('.main');                        
 
                         mainContainer.innerHTML = cards.filter(c => {
-                           /*  let today = `${new Date(Date.now()).getDate()}-${new Date(Date.now()).getMonth() + 1}-${new Date(Date.now()).getFullYear()}`;
+                            let today = `${new Date(Date.now()).getDate()}-${new Date(Date.now()).getMonth() + 1}-${new Date(Date.now()).getFullYear()}`;
                             let exibition = `${new Date(c.exibition).getDate()}-${new Date(c.exibition).getMonth() + 1}-${new Date(c.exibition).getFullYear()}`;
                             
                             if(today == exibition) return true;
 
-                            return false; */
-                            return true;
+                            return false;
                         }).map(c => `
                             <div class="card">
                                 <p>${c.content}</p>
@@ -124,11 +123,7 @@
                     card.easeFactor = factor.easeFactor;
                     card.exibition = getNextRepetitionDay(factor.interval);
 
-                    console.log(card);
-                    console.log(factor);
-
                     let response = await saveCard(card);
-                    console.log(response);
                     getAllCards();
                 } catch(err) {
                     console.error(err.message);
