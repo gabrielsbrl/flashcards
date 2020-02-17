@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <style>
+
+            * {
+                font-family: "Helvetica Neue", "Arial Narrow", sans-serif;
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* page structure */
+            .main {
+                width: 80%;
+                margin: 5em auto;
+                padding: 3em 2em;
+                background-color: #cacaca;
+            }
+
+            .main p {
+                text-align: center;
+            }
+
+            .card {
+                margin-bottom: 2em;
+                background-color: #c5c5c5;
+                padding: 2em 1em;
+            }
+
+            .card-controls {
+                text-align: center;
+            }
+
+            .card-controls button {
+                cursor: pointer;
+            }
+
+        </style>
+    </head>
+        
+    <body>
+        
+        <div class="main">
+            
+        </div>
+
+        <script src="index.js"></script>
+        <script>
+
+            const saveCard = card => fetch('/card', {
+                method: "put",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(card)
+            })
+            .then(response => response);
+
+            const getCard = cardId => fetch(`/card/${cardId}`).then(response => response.json());
+            
+            const getNextRepetitionDay = (daysFromToday) => {
+                let today = new Date(Date.now());                
+                today.setDate(today.getDate() + daysFromToday);
+                return today;
+            }
+
+            const getAllCards = () => {
+                fetch('/card/all')
+                    .then(response => response.json())
+                    .then(cards => {
+
+                        let mainContainer = document.querySelector('.main');                        
+
+                        mainContainer.innerHTML = cards.filter(c => {
+                           /*  let today = `${new Date(Date.now()).getDate()}-${new Date(Date.now()).getMonth() + 1}-${new Date(Date.now()).getFullYear()}`;
+                            let exibition = `${new Date(c.exibition).getDate()}-${new Date(c.exibition).getMonth() + 1}-${new Date(c.exibition).getFullYear()}`;
+                            
+                            if(today == exibition) return true;
+
+                            return false; */
+                            return true;
+                        }).map(c => `
+                            <div class="card">
+                                <p>${c.content}</p>
+                                <div class="card-controls">
+                                    <button onclick="setLevel(0, ${c.id})">Nível: 0</button>
+                                    <button onclick="setLevel(1, ${c.id})">Nível: 1</button>
+                                    <button onclick="setLevel(2, ${c.id})">Nível: 2</button>
+                                    <button onclick="setLevel(3, ${c.id})">Nível: 3</button>
+                                    <button onclick="setLevel(4, ${c.id})">Nível: 4</button>
+                                    <button onclick="setLevel(5, ${c.id})">Nível: 5</button>
+                                    <button onclick="setLevel(6, ${c.id})">Nível: 6</button>
+                                </div>
+                            </div>
+                        `).join('');
+
+                    })
+                    .catch(err => console.error(err));
+            };  
+
+            async function setLevel(level, cardId) {
+
+                try {
+
+                    let card = await getCard(cardId);
+                    let smt = new Sm();                
+                    let factor;
+    
+                    factor = smt.calc(level, parseInt(card.repetitions), parseInt(card.interval), parseFloat(card.easeFactor));
+    
+                    card.interval = factor.interval;
+                    card.repetitions = factor.repetitions;
+                    card.easeFactor = factor.easeFactor;
+                    card.exibition = getNextRepetitionDay(factor.interval);
+
+                    console.log(card);
+                    console.log(factor);
+
+                    let response = await saveCard(card);
+                    console.log(response);
+                    getAllCards();
+                } catch(err) {
+                    console.error(err.message);
+                }
+            }            
+
+            window.onload = () => { getAllCards(); };
+
+        </script>
+
+    </body>
+</html>
